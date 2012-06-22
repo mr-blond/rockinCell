@@ -1,0 +1,165 @@
+<?php
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Description of class
+ * 
+ * @author psid
+ */
+class Application {
+//put your code here
+    // --- ATTRIBUTES ---
+    
+    public function Application(){
+        
+    }
+    public function utilisateurExiste($id){
+        try{
+            $connexion = new PDO("mysql:host=".HOST_NAME.";dbname=".BD_NAME."", USER_NAME, PASSWD); // connexion à la BDD
+            
+            //création de la requete utilisé pour mettre les infos sur la base de données
+            $query = "SELECT * FROM utilisateur WHERE id_utilisateur = $id";
+            $reponse = $connexion->query($query);
+            $reponse->setFetchMode(PDO::FETCH_OBJ);
+            //echo $query;
+            //if($reponse->fetch()->id_utilisateur != null){
+            while($ligne = $reponse->fetch()){
+                    $dom = new DOMDocument('1.0','utf8');
+                    $racine = $dom->createElement('utilisateurs');//noeud racine
+                    $dom->appendChild($racine);
+                    $individu = $dom->createElement('individu');
+          
+                    $racine->appendChild($individu);  
+
+                    //création des éléments
+                    $id            = $dom->createElement('id',$ligne->id_utilisateur);
+                    $pseudo        = $dom->createElement('pseudo',$ligne->pseudo);
+                    $nom           = $dom->createElement('nom',$ligne->nom);
+                    $prenom        = $dom->createElement('prenom',$ligne->prenom);
+                    $description   = $dom->createElement('description',$ligne->description);
+                    $mail          = $dom->createElement('mail',$ligne->mail);
+                    $lienFB        = $dom->createElement('lienFB',$ligne->lienFB);
+                    $pays          = $dom->createElement('pays',$ligne->pays);
+                    $photoUrl      = $dom->createElement('photoUrl',$ligne->photoUrl);
+                    $musiquePref   = $dom->createElement('musiquePref',  htmlentities($ligne->musiquePref));
+                    $placeCamping  = $dom->createElement('placeCamping',$ligne->placeCamping);
+                    $masqueX       = $dom->createElement('masqueX',$ligne->masqueX);
+                    $masqueY       = $dom->createElement('masqueY',$ligne->masqueY);
+                    $sexe          = $dom->createElement('sexe', $ligne->sexe);
+                    $genrePref     = $dom->createElement('genrePref', $ligne->genrePref);
+                    $dateNaissance = $dom->createElement('dateNaissance', $ligne->anniv);
+                    $anneeFestival = $dom->createElement('anneesFestival');
+
+
+                    $individu->appendChild($id);
+                    $individu->appendChild($pseudo);
+                    $individu->appendChild($nom);
+                    $individu->appendChild($prenom);
+                    $individu->appendChild($description);
+                    $individu->appendChild($mail);
+                    $individu->appendChild($lienFB);
+                    $individu->appendChild($pays);
+                    $individu->appendChild($photoUrl);
+                    $individu->appendChild($musiquePref);
+                    $individu->appendChild($placeCamping);
+                    $individu->appendChild($masqueX);
+                    $individu->appendChild($masqueY);
+                    $individu->appendChild($sexe);
+                    $individu->appendChild($genrePref);
+                    $individu->appendChild($dateNaissance);
+                    $individu->appendChild($anneeFestival);
+                  
+                    echo $dom->saveXML();
+            } /*}else{
+                echo 'false';
+            }*/
+            
+        
+        } catch  (Exeption $error_string){
+            echo 'erreur : '.$error_string->getMessage().'</br>';
+            echo 'N° : '.$error_string->getCode();
+            die();
+        }
+    }
+    // mettre les information du nouvelle utilisateur dans la base de donnée
+    public function creerUtilisateur($id,$pseudo,$nom,$prenom,$description,$mail,$lienFB,$pays,$anniv,$photoUrl,$musiquePref,$placeCamping,$masqueX,$masqueY,$sexe,$genrePref){
+       
+        try{
+            $connexion = new PDO("mysql:host=".HOST_NAME.";dbname=".BD_NAME."", USER_NAME, PASSWD); // connexion à la BDD
+            
+            //création de la requete utilisé pour mettre les infos sur la base de données
+            $query = "INSERT INTO utilisateur (
+                id_utilisateur,
+                pseudo,
+                nom,
+                prenom,
+                description, 
+                mail,
+                lienFB,
+                pays,
+                anniv,
+                photoUrl,
+                musiquePref,
+                placeCamping,
+                masqueX, 
+                masqueY,
+                sexe,
+                genrePref) 
+          VALUES ($id,'$pseudo','$nom','$prenom','$description','$mail','$lienFB','$pays','$anniv','$photoUrl','$musiquePref',$placeCamping,$masqueX,$masqueY,'$sexe','$genrePref')";
+            $connexion->exec($query);
+            //----AJOUT DES ANNéES OU L'UTILISATEUR A PARTICIPé au festival
+           $tab = explode(',', $anneeFestival);
+           foreach ($tab as $ligne)
+            {
+                if($ligne != 'null'){
+                  $queryAnnee = "INSERT INTO anneeFestival (ID_utilisateur,annee)
+                                 VALUES($id,$ligne)";
+                  $connexion->exec($queryAnnee);
+                }
+
+
+            }
+            
+             
+            
+        
+        } catch  (Exeption $error_string){
+            echo 'erreur : '.$error_string->getMessage().'</br>';
+            echo 'N° : '.$error_string->getCode();
+            die();
+        }
+    }
+    public function modifierUtilisateur($id,$pseudo,$description,$placeCamping,$musiquePref,$photoUrl,$masqueX,$masqueY,$genrePref) {
+        try {
+              $connexion = new PDO("mysql:host=".HOST_NAME.";dbname=".BD_NAME."", USER_NAME, PASSWD); // connexion à la BDD
+              $query = "UPDATE utilisateur SET 
+                            pseudo = '$pseudo',
+                            description = '$description',
+                            photoUrl = '$photoUrl',
+                            musiquePref = '$musiquePref',
+                            placeCamping = $placeCamping,
+                            masqueX = $masqueX,
+                            masqueY = $masqueY,
+                            genrePref = '$genrePref'
+                            WHERE id_utilisateur = $id
+                            ";      
+              
+              $connexion->exec($query);
+              
+            
+            
+        } catch  (Exeption $error_string){
+            echo 'erreur : '.$error_string->getMessage().'</br>';
+            echo 'N° : '.$error_string->getCode();
+            die();
+        }
+        }
+        
+
+
+}
+?>
